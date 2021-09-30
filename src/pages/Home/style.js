@@ -31,3 +31,7 @@ export const SearchButton = styled.TouchableOpacity`
    align-items: center;
    justify-content: center;
 `;
+
+export const Title = styled.text`
+
+`;

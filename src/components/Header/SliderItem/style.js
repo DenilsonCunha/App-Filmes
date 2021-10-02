@@ -25,4 +25,8 @@ export const RateContainer = styled.View`
   align-items: center;
 `;
 
-export const Rate = styled.Text``;
+export const Rate = styled.Text`
+  padding-left: 4px;
+  color: #FFF;
+  font-size: 12px;
+`;

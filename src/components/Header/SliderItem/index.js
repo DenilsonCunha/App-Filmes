@@ -1,5 +1,4 @@
 import React from 'react'
-import {View, Text } from 'react-native'
 
 import {
    Container,
@@ -13,12 +12,11 @@ import { Ionicons } from '@expo/vector-icons'
 
 function SliderItem(){
     return(
-       <Container>
+       <Container activeOpacity={0.7} >
            <BannerItem 
              source={{ uri:'https://play-lh.googleusercontent.com/nz5s7-HJ3iijnvitzCwsa_oD5l7saKAnF_Hv3qGtsP6dtsXTqESZmfuQKqyZZD4UywyB'}}
-           />
-
-           <Title>Vingadores</Title>
+             />
+           <Title numberOfline={1}>Vingadores</Title>
 
            <RateContainer>
                <Ionicons name="md-star" size={12} color="#E7A74e" />

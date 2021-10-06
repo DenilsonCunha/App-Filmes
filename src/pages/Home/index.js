@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ScrollView } from 'react-native'
+import { ScrollView, ActivityIndicator } from 'react-native'
 
 
 import { 
@@ -19,26 +19,23 @@ import Header from '../../components/Header'
 import SliderItem from '../../components/Header/SliderItem'
 
 import api, { key } from '../../services/api'
+import { getListMovies, randomBanner} from '../../utills/movies'
 
 
 function Home(){
 
   const [nowMovies, setnowMovies] = useState([]);
-  const [popularMovies, setpopularmovies] = useState([]);
+  const [popularMovies, setpopularMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
+  const [bannerMovie, setBannerMovie] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(()=>{
        let isActive = true;
+       const ac = new AbortController();
+
 
        async function getMovies(){
-        // const response = await api.get('/movie/now_playing', {
-         //  params: {
-         //    api_key: key,
-         //    language: 'pt-BR',
-         //    page: 1,
-         //  }
-        // })
-
         const [nowData, popularData, topData] = await Promise.all([
           api.get('/movie/now_playing', {
             params: {
@@ -63,13 +60,40 @@ function Home(){
           }),
         ])
 
-          console.log(response.data);
+  if(isActive){
+         const nowList = getListMovies(10, nowData.data.results);
+         const popularList = getListMovies(10, popularData.data.results);
+         const topList = getListMovies(10, topData.data.results);
+
+         setBannerMovie(nowData.data.results[randomBanner(nowData.data.results)])
+         setnowMovies(nowList);
+         setpopularMovies(popularList);
+         setTopMovies(topList);
+         setLoading(false);
+
+        }
+
+        
+
        }
 
        getMovies();
 
+       return () => {
+         isActive = false;
+         ac.abort();
+       }
+
 
   }, [])
+
+  if(loading){
+    return(
+      <Container>
+        <ActivityIndicator size="large" color="#FFF"/>
+      </Container>
+    )
+  }
 
 
     return(
@@ -90,23 +114,25 @@ function Home(){
              <BannerButton>
                <Banner
                 resizeMethod="resize"
-                 source={{ uri:'https://media.istockphoto.com/photos/cacimba-do-padre-morro-do-pico-picture-id1327684718?b=1&k=20&m=1327684718&s=170667a&w=0&h=pA0uAULY9kExnuqqbs226UPuYjDthYwiBLptNrss9Bo=' }}
+                 source={{ uri: `https://image.tmdb.org/t/p/original/${bannerMovie.poster_path}` }}
                  />
              </BannerButton>
 
              <SliderMovie
                horizontal={true}
                showsHorizontalScrollIndicator={false}
-               data={[1,2,3,4]}
-               renderItem={ ({ item }) => <SliderItem/>}
+               data={nowMovies}
+               renderItem={ ({ item }) => <SliderItem data={item}/>}
+               keyExtractor={ (item) => String(item.id) }
              />
 
              <Title>Populares</Title>
              <SliderMovie
                horizontal={true}
                showsHorizontalScrollIndicator={false}
-               data={[1,2,3,4]}
-               renderItem={ ({ item }) => <SliderItem/>}
+               data={popularMovies}
+               renderItem={ ({ item }) => <SliderItem data={item}/>}
+               keyExtractor={ (item) => String(item.id) }
              />
 
              <Title>Mais votados</Title>
@@ -114,8 +140,9 @@ function Home(){
              <SliderMovie
                horizontal={true}
                showsHorizontalScrollIndicator={false}
-               data={[1,2,3,4]}
-               renderItem={ ({ item }) => <SliderItem/>}
+               data={topMovies}
+               renderItem={ ({ item }) => <SliderItem data={item}/>}
+               keyExtractor={ (item) => String(item.id) }
              />
 
            </ScrollView>

@@ -1,7 +1,8 @@
 import React from 'react'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
-import Home from '../pages/Home'
+import Home from '../pages/Home';
+import Detail from '../pages/Details';
 
 const Stack = createNativeStackNavigator()
 
@@ -14,6 +15,15 @@ function StackRoutes(){
             options={{
                 headerShown: false
             }}
+            />
+
+            <Stack.Screen 
+             name="Detail"
+             component={Detail}
+             option={{
+                 headerShown: false,
+                 title: 'Detalhes'
+             }}
             />
         </Stack.Navigator>
 

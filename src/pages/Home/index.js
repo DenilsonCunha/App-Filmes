@@ -1,126 +1,151 @@
-import React, { useState, useEffect } from 'react'
-import { ScrollView } from 'react-native'
+import React, { useState, useEffect } from "react";
+import { ScrollView, ActivityIndicator } from "react-native";
 
-
-import { 
+import {
   Container,
-   SearchContainer,
-    Input,
-     SearchButton,
-      Title,
-       BannerButton,
-        Banner,
-         SliderMovie
-  } from './style'
+  SearchContainer,
+  Input,
+  SearchButton,
+  Title,
+  BannerButton,
+  Banner,
+  SliderMovie,
+} from "./style";
 
-import { Feather } from '@expo/vector-icons'
+import { Feather } from "@expo/vector-icons";
 
-import Header from '../../components/Header'
-import SliderItem from '../../components/Header/SliderItem'
+import Header from "../../components/Header";
+import SliderItem from "../../components/Header/SliderItem";
 
-import api, { key } from '../../services/api'
+import api, { key } from "../../services/api";
+import { getListMovies, randomBanner } from "../../utills/movies";
 
+import { useNavigation } from '@react-navigation/native'
 
-function Home(){
-
+function Home() {
   const [nowMovies, setnowMovies] = useState([]);
-  const [popularMovies, setpopularmovies] = useState([]);
+  const [popularMovies, setpopularMovies] = useState([]);
   const [topMovies, setTopMovies] = useState([]);
+  const [bannerMovie, setBannerMovie] = useState({});
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-       let isActive = true;
+  const navigation = useNavigation();
 
-       async function getMovies(){
-        // const response = await api.get('/movie/now_playing', {
-         //  params: {
-         //    api_key: key,
-         //    language: 'pt-BR',
-         //    page: 1,
-         //  }
-        // })
+  useEffect(() => {
+    let isActive = true;
+    const ac = new AbortController();
 
-        const [nowData, popularData, topData] = await Promise.all([
-          api.get('/movie/now_playing', {
-            params: {
-              api_key: key,
-              language: 'pt-BR',
-              page: 1,
-            }
-          }),
-          api.get('/movie/popular', {
-            params: {
-              api_key: key,
-              language: 'pt-BR',
-              page: 1,
-            }
-          }),
-          api.get('/movie/top_rated', {
-            params: {
-              api_key: key,
-              language: 'pt-BR',
-              page: 1,
-            }
-          }),
-        ])
+    async function getMovies() {
+      const [nowData, popularData, topData] = await Promise.all([
+        api.get("/movie/now_playing", {
+          params: {
+            api_key: key,
+            language: "pt-BR",
+            page: 1,
+          },
+        }),
+        api.get("/movie/popular", {
+          params: {
+            api_key: key,
+            language: "pt-BR",
+            page: 1,
+          },
+        }),
+        api.get("/movie/top_rated", {
+          params: {
+            api_key: key,
+            language: "pt-BR",
+            page: 1,
+          },
+        }),
+      ]);
 
-          console.log(response.data);
-       }
+      if (isActive) {
+        const nowList = getListMovies(10, nowData.data.results);
+        const popularList = getListMovies(10, popularData.data.results);
+        const topList = getListMovies(10, topData.data.results);
 
-       getMovies();
+        setBannerMovie(
+          nowData.data.results[randomBanner(nowData.data.results)]
+        );
+        setnowMovies(nowList);
+        setpopularMovies(popularList);
+        setTopMovies(topList);
+        setLoading(false);
+      }
+    }
 
+    getMovies();
 
-  }, [])
+    return () => {
+      isActive = false;
+      ac.abort();
+    };
+  }, []);
 
+  function navegateDetailsPage(item) {
+    navigation.navigate('Detail', {id: item.id})
+  }
 
-    return(
-        <Container>
-            <Header title="Prime Filmes"/>
-              <SearchContainer>
-                 <Input 
-               placeholder="Ex: Vingadores"
-                 />
-             <SearchButton>
-                 <Feather name="search" size={30} color="#FFF" />
-             </SearchButton>
-           </SearchContainer>
+  if (loading) {
+    return (
+      <Container>
+        <ActivityIndicator size="large" color="#FFF" />
+      </Container>
+    );
+  }
 
-           <ScrollView showsVerticalScrollIndicator={false}>
-             <Title>Em cartaz</Title>
+  return (
+    <Container>
+      <Header title="Prime Filmes" />
+      <SearchContainer>
+        <Input placeholder="Ex: Vingadores" />
+        <SearchButton>
+          <Feather name="search" size={30} color="#FFF" />
+        </SearchButton>
+      </SearchContainer>
 
-             <BannerButton>
-               <Banner
-                resizeMethod="resize"
-                 source={{ uri:'https://media.istockphoto.com/photos/cacimba-do-padre-morro-do-pico-picture-id1327684718?b=1&k=20&m=1327684718&s=170667a&w=0&h=pA0uAULY9kExnuqqbs226UPuYjDthYwiBLptNrss9Bo=' }}
-                 />
-             </BannerButton>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Title>Em cartaz</Title>
 
-             <SliderMovie
-               horizontal={true}
-               showsHorizontalScrollIndicator={false}
-               data={[1,2,3,4]}
-               renderItem={ ({ item }) => <SliderItem/>}
-             />
+        <BannerButton activeOpacity={0.9} onPress={() => navegateDetailsPage(bannerMovie) }>
+          <Banner
+            resizeMethod="resize"
+            source={{
+              uri: `https://image.tmdb.org/t/p/original/${bannerMovie.poster_path}`,
+            }}
+          />
+        </BannerButton>
 
-             <Title>Populares</Title>
-             <SliderMovie
-               horizontal={true}
-               showsHorizontalScrollIndicator={false}
-               data={[1,2,3,4]}
-               renderItem={ ({ item }) => <SliderItem/>}
-             />
+        <SliderMovie
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          data={nowMovies}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={ () => navegateDetailsPage(item) } />}
+          keyExtractor={(item) => String(item.id)}
+        />
 
-             <Title>Mais votados</Title>
+        <Title>Populares</Title>
+        <SliderMovie
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          data={popularMovies}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={ () => navegateDetailsPage(item) } />}
+          keyExtractor={(item) => String(item.id)}
+        />
 
-             <SliderMovie
-               horizontal={true}
-               showsHorizontalScrollIndicator={false}
-               data={[1,2,3,4]}
-               renderItem={ ({ item }) => <SliderItem/>}
-             />
+        <Title>Mais votados</Title>
 
-           </ScrollView>
-        </Container>
-    )
+        <SliderMovie
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          data={topMovies}
+          renderItem={({ item }) => <SliderItem data={item} navigatePage={ () => navegateDetailsPage(item) } />}
+          keyExtractor={(item) => String(item.id)}
+        />
+      </ScrollView>
+    </Container>
+  );
 }
 
 export default Home;

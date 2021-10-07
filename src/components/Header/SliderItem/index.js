@@ -10,17 +10,17 @@ import {
 
 import { Ionicons } from '@expo/vector-icons'
 
-function SliderItem(){
+function SliderItem({data, navigatePage}){
     return(
-       <Container activeOpacity={0.7} >
+       <Container activeOpacity={0.7} onPress={() => navigatePage(data) }>
            <BannerItem 
-             source={{ uri:'https://play-lh.googleusercontent.com/nz5s7-HJ3iijnvitzCwsa_oD5l7saKAnF_Hv3qGtsP6dtsXTqESZmfuQKqyZZD4UywyB'}}
+             source={{ uri:`https://image.tmdb.org/t/p/original/${data.poster_path}`}}
              />
-           <Title numberOfline={1}>Vingadores</Title>
+           <Title numberOfline={1}>{data.title}</Title>
 
            <RateContainer>
                <Ionicons name="md-star" size={12} color="#E7A74e" />
-               <Rate>9/10</Rate>
+               <Rate>{data.vote_average}/10</Rate>
            </RateContainer>
        </Container>
     )

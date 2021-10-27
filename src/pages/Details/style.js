@@ -52,3 +52,31 @@ export const Title = styled.Text`
   padding: 8px 14px;
   margin-top: 8px;
 `;
+
+export const ContentArea = styled.View`
+  flex-direction: row;
+  align-items: center;
+  padding: 0 14px;
+  justify-content: space-between;
+`;
+
+export const Rate = styled.Text`
+  font-size: 10px;
+  font-weight: bold;
+  color: #FFF;
+`;
+
+export const ListGenres = styled.FlatList`
+  padding-left: 14px;
+  margin: 8px 0;
+  max-height: 35px;
+  min-height: 35px;
+`;
+
+export const Description = styled.Text`
+  padding-left: 14px;
+  padding-right: 14px;
+  padding-bottom: 30px;
+  color: #FFF;
+  line-height: 20px;
+`;

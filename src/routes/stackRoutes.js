@@ -20,7 +20,7 @@ function StackRoutes(){
             <Stack.Screen 
              name="Detail"
              component={Detail}
-             option={{
+             options={{
                  headerShown: false,
                  title: 'Detalhes'
              }}
